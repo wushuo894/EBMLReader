@@ -1,7 +1,5 @@
 package com.matthewn4444.ebml.elements;
 
-import android.util.Log;
-
 import com.matthewn4444.ebml.EBMLParsingException;
 import com.matthewn4444.ebml.node.BlockNode;
 import com.matthewn4444.ebml.node.ByteNode;
@@ -11,6 +9,7 @@ import com.matthewn4444.ebml.node.LongNode;
 import com.matthewn4444.ebml.node.MasterNode;
 import com.matthewn4444.ebml.node.NodeBase;
 import com.matthewn4444.ebml.node.StringNode;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -18,6 +17,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Set;
 
+@Slf4j
 public class MasterElement extends ElementBase {
 
     public static int VOID = 0xEC;
@@ -437,7 +437,7 @@ public class MasterElement extends ElementBase {
                 // This section is void, so ignore it
                 raf.skipBytes(readLength(raf));
             } else {
-                Log.w(TAG, "This master does not have id 0x"
+                log.warn(TAG+" "+ "This master does not have id 0x"
                         + Integer.toHexString(id) + " in its schema");
                 raf.skipBytes(readLength(raf));
             }
@@ -452,7 +452,7 @@ public class MasterElement extends ElementBase {
     @Override
     public StringBuilder output(int level) {
         StringBuilder sb = super.output(level);
-        Log.v(TAG, sb.toString() + "MASTER [" + hexId() + "]");
+        log.info(TAG+" "+ sb.toString() + "MASTER [" + hexId() + "]");
         for (int i = 0; i < mElements.size(); i++) {
             mElements.get(i).output(level + 1);
         }

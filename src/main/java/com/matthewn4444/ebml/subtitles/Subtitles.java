@@ -1,20 +1,20 @@
 package com.matthewn4444.ebml.subtitles;
 
-import android.util.Log;
-
 import com.matthewn4444.ebml.Tracks;
 import com.matthewn4444.ebml.elements.BlockElement;
 import com.matthewn4444.ebml.elements.IntElement;
 import com.matthewn4444.ebml.elements.MasterElement;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.extern.slf4j.Slf4j;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
+@EqualsAndHashCode(callSuper = true)
+@Slf4j
+@Data
 public abstract class Subtitles extends Tracks {
     public static final String TAG = "Subtitles";
     public static final String SSA_CODEC_ID = "S_TEXT/ASS";
@@ -23,7 +23,7 @@ public abstract class Subtitles extends Tracks {
 
     public enum Type {
         SSA, SRT, PGS
-    };
+    }
 
     protected final boolean mIsCompressed;
     protected final Type mType;
@@ -34,6 +34,7 @@ public abstract class Subtitles extends Tracks {
     /**
      * Creates the subtitles class from a blackgroup of data read from a cluster entry
      * Internal use only
+     *
      * @param blockgroup MasterElement containing cluster blockgroup information
      * @return a subtitles object containing all readable data
      * @throws UnsupportedEncodingException
@@ -48,20 +49,24 @@ public abstract class Subtitles extends Tracks {
             String name = blockgroup.getValueString(Tracks.NAME);
             String language = blockgroup.getValueString(Tracks.LANGUAGE);
             String codecID = blockgroup.getValueString(Tracks.CODEC_ID);
-            if (codecID.equals(SSA_CODEC_ID)) {
-                return new SSASubtitles(trackNumber, blockgroup.getFilePosition(),
-                        blockgroup.getFileLength(), isEnabled, isDefault, name, language,
-                        blockgroup.getValueString(Tracks.CODEC_PRIVATE), hasCompression);
-            } else if (codecID.equals(SRT_CODEC_ID)) {
-                return new SRTSubtitles(trackNumber, blockgroup.getFilePosition(),
-                        blockgroup.getFileLength(), isEnabled, isDefault, name, language,
-                        hasCompression);
-            } else if (codecID.equals(PGS_CODEC_ID)) {
-                return new PGSSubtitles(trackNumber, blockgroup.getFilePosition(),
-                        blockgroup.getFileLength(), isEnabled, isDefault, name, language,
-                        hasCompression);
+            switch (codecID) {
+                case SSA_CODEC_ID -> {
+                    return new SSASubtitles(trackNumber, blockgroup.getFilePosition(),
+                            blockgroup.getFileLength(), isEnabled, isDefault, name, language,
+                            blockgroup.getValueString(Tracks.CODEC_PRIVATE), hasCompression);
+                }
+                case SRT_CODEC_ID -> {
+                    return new SRTSubtitles(trackNumber, blockgroup.getFilePosition(),
+                            blockgroup.getFileLength(), isEnabled, isDefault, name, language,
+                            hasCompression);
+                }
+                case PGS_CODEC_ID -> {
+                    return new PGSSubtitles(trackNumber, blockgroup.getFilePosition(),
+                            blockgroup.getFileLength(), isEnabled, isDefault, name, language,
+                            hasCompression);
+                }
             }
-            Log.w(TAG, "Unable to parse subtitles codec id: " + codecID);
+            log.warn("{} Unable to parse subtitles codec id: {}", TAG, codecID);
         }
         return null;
     }
@@ -80,7 +85,8 @@ public abstract class Subtitles extends Tracks {
      * The data appended is added to the unreadsubtitle list, use readUnreadSubtitles to move it
      * to read and return the subtitles back
      * Internal use only
-     * @param block of subtitle data from the cluster entry
+     *
+     * @param block    of subtitle data from the cluster entry
      * @param timecode the time when this subtitle is shown
      * @param duration the time of how long the subtitle is shown for
      */
@@ -90,12 +96,12 @@ public abstract class Subtitles extends Tracks {
      * Move the unread subtitles that was appended and returns the new unread subtitles to be parsed
      * This function exists so that you can stream append and read subtitles instead of waiting to
      * finish reading all the subtitles from a file first
+     *
      * @return a list of subtitles that were not read yet
      */
     public List<Caption> readUnreadSubtitles() {
         synchronized (mUnreadCaptions) {
-            ArrayList<Caption> list = new ArrayList<>();
-            list.addAll(mUnreadCaptions);
+            ArrayList<Caption> list = new ArrayList<>(mUnreadCaptions);
 
             // Transfer the unread captions to read
             mReadCaptions.addAll(mUnreadCaptions);
@@ -108,6 +114,7 @@ public abstract class Subtitles extends Tracks {
      * Get the read captions.
      * Once the captions have been appended internally, you should run readUnreadSubtitles() to read
      * all the new subtitles and then they get moved to read status.
+     *
      * @return
      */
     public ArrayList<Caption> getAllReadCaptions() {
@@ -115,74 +122,31 @@ public abstract class Subtitles extends Tracks {
     }
 
     /**
-     * Write a WebVTT file of this subtitle after all is appended
-     * @param path to save the file
-     * @return if it wrote successfully
+     * 获取内容并转换为 VTT
+     *
+     * @return VTT
      */
-    public boolean writeVTTFile(String path) {
-        OutputStreamWriter out = null;
-        try {
-            out = new OutputStreamWriter(new FileOutputStream(path), "utf8");
-
-            StringBuilder sb = new StringBuilder();
-            sb.append("WEBVTT\n\n");
-            int n = 1;
-            for (Caption caption : mReadCaptions) {
-                String entry = caption.getFormattedVTT();
-                if (entry != null) {
-                    sb.append(n++).append('\n')
+    public String getContentsToVTT() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("WEBVTT\n\n");
+        int n = 1;
+        for (Caption caption : readUnreadSubtitles()) {
+            String entry = caption.getFormattedVTT();
+            if (entry != null) {
+                sb.append(n++).append('\n')
                         .append(caption.getStartTime().format())
                         .append(" --> ")
                         .append(caption.getEndTime().format()).append('\n')
                         .append(caption.getFormattedVTT().replaceAll("(?i)\\\\n", "\n"))
                         .append("\n\n");
-                }
-            }
-            out.append(sb.toString());
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return false;
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (out != null) {
-                try {
-                    out.close();
-                } catch (IOException e) {
-                }
             }
         }
-        return true;
-    }
-
-    /**
-     * Write the subtitle to file
-     * @param path to write the file
-     * @return if successful
-     */
-    public boolean writeFile(String path) {
-        OutputStreamWriter out = null;
-        try {
-            out = new OutputStreamWriter(new FileOutputStream(path), "utf8");
-            out.append(getContents());
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return false;
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (out != null) {
-                try {
-                    out.close();
-                } catch (IOException e) {
-                }
-            }
-        }
-        return true;
+        return sb.toString();
     }
 
     /**
      * Get number of subtitles
+     *
      * @return
      */
     public int getSubtitleCount() {
@@ -193,6 +157,7 @@ public abstract class Subtitles extends Tracks {
 
     /**
      * Get type of subtitles
+     *
      * @return either SSA or SRT
      */
     public Type getType() {
@@ -202,6 +167,7 @@ public abstract class Subtitles extends Tracks {
     /**
      * Get a more presentable entry name
      * Format: 'Name: [lang]'
+     *
      * @return presentable name
      */
     public String getPresentableName() {
@@ -220,7 +186,7 @@ public abstract class Subtitles extends Tracks {
         return Tracks.Type.SUBTITLE;
     }
 
-    protected abstract String getContents();
+    public abstract String getContents();
 
     protected void appendCaption(Caption caption) {
         synchronized (mUnreadCaptions) {

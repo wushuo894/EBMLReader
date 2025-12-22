@@ -16,7 +16,7 @@ public class SRTSubtitles extends Subtitles {
     }
 
     @Override
-    protected String getContents() {
+    public String getContents() {
         StringBuilder sb = new StringBuilder();
         int subNumber = 1;
         for (int i = 0; i < mReadCaptions.size(); i++) {

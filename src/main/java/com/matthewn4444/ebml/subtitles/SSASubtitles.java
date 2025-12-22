@@ -18,14 +18,14 @@ public class SSASubtitles extends Subtitles {
     }
 
     @Override
-    protected String getContents() {
+    public String getContents() {
         StringBuilder sb = new StringBuilder();
         sb.append(mHeaderData);
-        for (int i = 0; i < mReadCaptions.size(); i++) {
-            sb.append(mReadCaptions.get(i).getFormattedText()).append("\n");
+        for (Caption mReadCaption : mReadCaptions) {
+            sb.append(mReadCaption.getFormattedText()).append("\n");
         }
-        for (int i = 0; i < mUnreadCaptions.size(); i++) {
-            sb.append(mUnreadCaptions.get(i).getFormattedText()).append("\n");
+        for (Caption mUnreadCaption : mUnreadCaptions) {
+            sb.append(mUnreadCaption.getFormattedText()).append("\n");
         }
         return sb.toString();
     }

@@ -28,22 +28,4 @@ public class SRTCaption extends Caption {
     public String getFormattedVTT() {
         return getStringData();
     }
-
-    @Override
-    protected void formatTimePoint(TimePoint time, StringBuilder sb) {
-        int hours = time.getHours();
-        int min = time.getMinutes();
-        int sec = time.getSeconds();
-        int msec = time.getMilliseconds();
-        if (0 <= hours && hours < 10) sb.append(0);
-        sb.append(hours).append(':');
-        if (0 <= min && min < 10) sb.append(0);
-        sb.append(min).append(':');
-        if (0 <= sec && sec < 10) sb.append(0);
-        sb.append(sec).append(',');
-        if (0 <= msec && msec < 100) sb.append(0);
-        if (0 <= msec && msec < 10) sb.append(0);
-        sb.append(msec);
-    }
-
 }

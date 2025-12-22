@@ -1,13 +1,14 @@
 package com.matthewn4444.ebml.subtitles;
 
 import com.matthewn4444.ebml.elements.BlockElement;
+import lombok.Cleanup;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.zip.DataFormatException;
+import java.nio.charset.StandardCharsets;
 import java.util.zip.Inflater;
 
+@Slf4j
 public abstract class Caption {
 
     public static class TimePoint {
@@ -82,35 +83,27 @@ public abstract class Caption {
     }
 
     public abstract String getFormattedText();
+
     public abstract String getFormattedVTT();
 
     public byte[] getByteData() {
         try {
             byte[] data = mBlock.readData();
-            if (mIsCompressed) {
-                // Run zlib decompression on these bytes
-                mDecompressor.setInput(data);
-                ByteArrayOutputStream bos = new ByteArrayOutputStream(data.length);
-                try {
-                    byte[] buf = new byte[1024];
-                    while (!mDecompressor.finished()) {
-                        int count = mDecompressor.inflate(buf);
-                        bos.write(buf, 0, count);
-                    }
-                    return bos.toByteArray();
-                } catch (DataFormatException e) {
-                    e.printStackTrace();
-                } finally {
-                    try {
-                        bos.close();
-                    } catch (IOException ignored) {
-                    }
-                }
-            } else {
+            if (!mIsCompressed) {
                 return data;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+            // Run zlib decompression on these bytes
+            mDecompressor.setInput(data);
+            @Cleanup
+            ByteArrayOutputStream bos = new ByteArrayOutputStream(data.length);
+            byte[] buf = new byte[1024];
+            while (!mDecompressor.finished()) {
+                int count = mDecompressor.inflate(buf);
+                bos.write(buf, 0, count);
+            }
+            return bos.toByteArray();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
         }
         return null;
     }
@@ -120,12 +113,7 @@ public abstract class Caption {
         if (data == null) {
             return null;
         }
-        try {
-            return new String(data, "utf8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return new String(data, StandardCharsets.UTF_8);
     }
 
     public TimePoint getStartTime() {
@@ -140,7 +128,7 @@ public abstract class Caption {
         return mType;
     }
 
-    protected void formatTimePoint(TimePoint time, StringBuilder sb) {
+    void formatTimePoint(TimePoint time, StringBuilder sb) {
         int hours = time.getHours();
         int min = time.getMinutes();
         int sec = time.getSeconds();

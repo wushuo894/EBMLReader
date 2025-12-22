@@ -1,15 +1,15 @@
 package com.matthewn4444.ebml.elements;
 
-import android.util.Log;
-
 import com.matthewn4444.ebml.EBMLException;
 import com.matthewn4444.ebml.node.NodeBase;
 import com.matthewn4444.ebml.node.StringNode;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 
+@Slf4j
 public class StringElement extends ElementBase {
     private String mData;
 
@@ -46,7 +46,7 @@ public class StringElement extends ElementBase {
     public StringBuilder output(int level) {
         StringBuilder sb = super.output(level);
         String data = mData.length() > 20 ? mData.substring(0, 20) + "..." : mData;
-        Log.v(TAG, sb.toString() + "STR [" + hexId() + "]: '" + data + "'");
+        log.info(TAG+" "+ sb.toString() + "STR [" + hexId() + "]: '" + data + "'");
         return null;
     }
 }

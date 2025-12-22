@@ -1,15 +1,14 @@
 package com.matthewn4444.ebml.elements;
 
-
-import android.util.Log;
-
 import com.matthewn4444.ebml.EBMLParsingException;
 import com.matthewn4444.ebml.node.FloatNode;
 import com.matthewn4444.ebml.node.NodeBase;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
+@Slf4j
 public class FloatElement extends ElementBase {
     private float mData;
 
@@ -43,7 +42,7 @@ public class FloatElement extends ElementBase {
     @Override
     public StringBuilder output(int level) {
         StringBuilder sb = super.output(level);
-        Log.v(TAG, sb.toString() + "FLOAT [" + hexId() + "]: " + mData);
+        log.info(TAG+" "+ sb.toString() + "FLOAT [" + hexId() + "]: " + mData);
         return null;
     }
 }

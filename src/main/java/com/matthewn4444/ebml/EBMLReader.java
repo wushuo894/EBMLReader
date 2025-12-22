@@ -1,18 +1,13 @@
 package com.matthewn4444.ebml;
 
-import android.util.Log;
-
 import com.matthewn4444.ebml.Attachments.FileAttachment;
-import com.matthewn4444.ebml.elements.BlockElement;
-import com.matthewn4444.ebml.elements.ElementBase;
-import com.matthewn4444.ebml.elements.IntElement;
-import com.matthewn4444.ebml.elements.LongElement;
-import com.matthewn4444.ebml.elements.MasterElement;
+import com.matthewn4444.ebml.elements.*;
 import com.matthewn4444.ebml.node.IntNode;
 import com.matthewn4444.ebml.node.MasterNode;
 import com.matthewn4444.ebml.node.NodeBase;
 import com.matthewn4444.ebml.node.StringNode;
 import com.matthewn4444.ebml.subtitles.Subtitles;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -21,6 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@Slf4j
 public class EBMLReader {
     private static final String TAG = "EBMLReader";
 
@@ -107,9 +103,10 @@ public class EBMLReader {
     /**
      * Open a file to read.
      * Please use close() later
+     *
      * @param path file to open
      * @throws IOException
-    */
+     */
     public EBMLReader(String path) throws IOException {
         mIsOpened = true;
         mHasCueSubtitlesPos = false;
@@ -119,6 +116,7 @@ public class EBMLReader {
     /**
      * Pass an already allocated RandomAccessFile to be read.
      * Please use close() later
+     *
      * @param randomAccessFile to be read
      */
     public EBMLReader(RandomAccessFile randomAccessFile) {
@@ -128,6 +126,7 @@ public class EBMLReader {
 
     /**
      * Closes the RandomAccessFile, you will receive errors trying to read this file
+     *
      * @throws IOException
      */
     public void close() throws IOException {
@@ -139,6 +138,7 @@ public class EBMLReader {
 
     /**
      * Check to see if this class reader is opened
+     *
      * @return if file is opened and can be read
      */
     public boolean isOpened() {
@@ -147,6 +147,7 @@ public class EBMLReader {
 
     /**
      * Gets the position of cues in this file
+     *
      * @return cues offset
      */
     public long getCuesPosition() {
@@ -162,6 +163,7 @@ public class EBMLReader {
 
     /**
      * Gets the position of chapters in this file
+     *
      * @return chapters offset
      */
     public long getChaptersPosition() {
@@ -177,6 +179,7 @@ public class EBMLReader {
 
     /**
      * Gets the position of tracks in this file
+     *
      * @return tracks offset
      */
     public long getTracksPosition() {
@@ -192,6 +195,7 @@ public class EBMLReader {
 
     /**
      * Gets the position of attachments in this file
+     *
      * @return attachments offset
      */
     public long getAttachmentsPosition() {
@@ -210,6 +214,7 @@ public class EBMLReader {
      * You should use this first to see if this file is an MKV file and supports EBML.
      * This also reads the segment information for seek head which will contain all the ids and
      * positions for each segment in the file (such as tracks, attachments, chapters etc).
+     *
      * @return if this file is an MKV file
      * @throws IOException
      */
@@ -279,6 +284,7 @@ public class EBMLReader {
 
     /**
      * Gets the tracks length region
+     *
      * @return the length of the region
      * @throws IOException
      */
@@ -295,6 +301,7 @@ public class EBMLReader {
 
     /**
      * Gets the attachments length region
+     *
      * @return the length of the region
      * @throws IOException
      */
@@ -314,6 +321,7 @@ public class EBMLReader {
 
     /**
      * Gets the cues length region
+     *
      * @return the length of the region
      * @throws IOException
      */
@@ -330,6 +338,7 @@ public class EBMLReader {
 
     /**
      * Gets the chapters length region
+     *
      * @return the length of the region
      * @throws IOException
      */
@@ -349,6 +358,7 @@ public class EBMLReader {
      * This would give you information about the video, audio and other tracks such as subtitles
      * This allocates a list of subtitles where you can query with getSubtitles().
      * Getting readable video and audio data is not supported yet.
+     *
      * @throws IOException
      */
     public void readTracks() throws IOException {
@@ -404,13 +414,14 @@ public class EBMLReader {
     /**
      * Read the segment attachments
      * This will read the attachment data which you can get with getAttachments().
+     *
      * @throws IOException
      */
     public void readAttachments() throws IOException {
         if (mAttachmentsHeader == null) {
             findAttachmentsPosition();
             if (mAttachmentsPosition == 0) {
-                Log.v(TAG, "There are no attachments");
+                log.info(TAG + " There are no attachments");
                 return;
             }
 
@@ -432,6 +443,7 @@ public class EBMLReader {
     /**
      * See if there are attachments in the video. If attachments was not parsed, it will look for it
      * from the segments after reading the header.
+     *
      * @return whether or not the video has any attachments
      * @throws IOException
      */
@@ -445,6 +457,7 @@ public class EBMLReader {
     /**
      * Gets the amount of video cues inside the video file
      * Use this to get the total amount of cues to parse the subtitles
+     *
      * @return the amount of video cues
      */
     public int getCuesCount() {
@@ -453,6 +466,7 @@ public class EBMLReader {
 
     /**
      * Get the start address of a cue
+     *
      * @param index position of the cue
      * @return start address
      */
@@ -462,6 +476,7 @@ public class EBMLReader {
 
     /**
      * Get the end address of a cue
+     *
      * @param index position of the cue
      * @return end address
      */
@@ -471,6 +486,7 @@ public class EBMLReader {
 
     /**
      * Get the start time of a cue
+     *
      * @param index position of the cue
      * @return start time
      */
@@ -480,6 +496,7 @@ public class EBMLReader {
 
     /**
      * Get the next time code of a cue
+     *
      * @param index position of the cue
      * @return next time code
      */
@@ -496,6 +513,7 @@ public class EBMLReader {
      * use getSubtitles().get(i).readUnreadSubtitles() to get the read subtitle
      * On the dev side, you should keep a Set<Integer> to keep track of which cue entries
      * you have read so you dont need to run this function on the same entry again.
+     *
      * @param index of the cue frame
      * @return if there are any subtitles parsed
      * @throws IOException
@@ -616,6 +634,7 @@ public class EBMLReader {
     /**
      * Find the cue entry index within the time provided
      * Finds the index using binary search
+     *
      * @param time specified to search for the index
      * @return the index
      */
@@ -637,17 +656,18 @@ public class EBMLReader {
         while (low < high) {
             int mid = (low + high) / 2;
             if (mCueFrames.get(mid).mTimecode < time) {
-                low = mid+1;
+                low = mid + 1;
             } else {
                 high = mid;
             }
         }
-        return Math.max(high-1, 0);
+        return Math.max(high - 1, 0);
     }
 
     /**
      * Find the cue entry index within the address provided
      * Finds the index using binary search
+     *
      * @param address specified to search for the index
      * @return the index
      */
@@ -666,17 +686,18 @@ public class EBMLReader {
         while (low < high) {
             int mid = (low + high) / 2;
             if (mCueFrames.get(mid).mStartAddress < address) {
-                low = mid+1;
+                low = mid + 1;
             } else {
                 high = mid;
             }
         }
-        return Math.max(high-1, 0);
+        return Math.max(high - 1, 0);
     }
 
     /**
      * Query if this cue entry has any subtitles to be parsed. Once you use readSubtitlesInCueFrame
      * on a cue entry, it will be marked as read regardless if it has any subtitles.
+     *
      * @param index which cue entry
      * @return if you can parse this entry
      */
@@ -691,6 +712,7 @@ public class EBMLReader {
      * also contain information directly to each subtitle entry.
      * This is mainly used to get the locations of clusters for subtitles
      * Performance-wise does pretty quickly but should not be done on the ui-thread
+     *
      * @throws IOException
      */
     public void readCues() throws IOException {
@@ -779,6 +801,7 @@ public class EBMLReader {
     /**
      * Quickly reads only the header of the cues to find the position of the first cluster entry
      * which leads you do the video data
+     *
      * @return address for the first video frame (cluster)
      * @throws IOException
      */
@@ -793,6 +816,7 @@ public class EBMLReader {
 
     /**
      * Get the duration in milliseconds of this video
+     *
      * @return duration in ms
      */
     public float getDuration() {
@@ -802,13 +826,14 @@ public class EBMLReader {
     /**
      * Get the subtitles after parsing the video file.
      * You must call the functions in the order:
-     *      readHeader()
-     *      readTracks()
-     *          - at this point you can get how many subtitle tracks are in this file, but no info in it
-     *      readCues()
-     *      readNextSubtitle() till it returns false
-     *      readUnreadSubtitles()
-     *          - now all the subtitles have been parsed and you can get the information
+     * readHeader()
+     * readTracks()
+     * - at this point you can get how many subtitle tracks are in this file, but no info in it
+     * readCues()
+     * readNextSubtitle() till it returns false
+     * readUnreadSubtitles()
+     * - now all the subtitles have been parsed and you can get the information
+     *
      * @return a readable list of subtitles class
      */
     public ArrayList<Subtitles> getSubtitles() {
@@ -818,9 +843,10 @@ public class EBMLReader {
     /**
      * Get the attachments after parsing the tracks
      * You must call the functions in the order:
-     *      readHeader()
-     *      readTracks()
-     *      readAttachments()
+     * readHeader()
+     * readTracks()
+     * readAttachments()
+     *
      * @return a list of attachments
      */
     public ArrayList<FileAttachment> getAttachments() {
@@ -830,8 +856,9 @@ public class EBMLReader {
     /**
      * Get the audio tracks after parsing the header
      * You must call the functions in the order:
-     *      readHeader()
-     *      readTracks()
+     * readHeader()
+     * readTracks()
+     *
      * @return a readable list of the audio tracks
      */
     public ArrayList<AudioTrack> getAudioTracks() {

@@ -1,10 +1,9 @@
 package com.matthewn4444.ebml.elements;
 
-import android.util.Log;
-
 import com.matthewn4444.ebml.EBMLParsingException;
 import com.matthewn4444.ebml.node.BlockNode;
 import com.matthewn4444.ebml.node.NodeBase;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -13,9 +12,10 @@ import java.util.Set;
 /**
  * A block element is simple representation of a BLOCK object represented in the EBML documentation.
  * http://www.matroska.org/technical/specs/index.html#block_structure
- *
+ * <p>
  * This will contain all the information gained from parsing track data from cluster entries
  */
+@Slf4j
 public class BlockElement extends ElementBase {
     private final RandomAccessFile mRaf;
 
@@ -29,7 +29,8 @@ public class BlockElement extends ElementBase {
     /**
      * Quickly scan the block data whether to read it or not depending if we whitelisted the track
      * number of this block of data
-     * @param raf file stream
+     *
+     * @param raf          file stream
      * @param validNumbers whitelist of valid track numbers
      * @return whether to skip or not
      * @throws IOException
@@ -59,6 +60,7 @@ public class BlockElement extends ElementBase {
 
     /**
      * Get the bytes of data, could be compressed
+     *
      * @return data
      */
     public byte[] readData() throws IOException {
@@ -78,6 +80,7 @@ public class BlockElement extends ElementBase {
 
     /**
      * Get the track number
+     *
      * @return track number
      */
     public int getTrackNumber() {
@@ -86,6 +89,7 @@ public class BlockElement extends ElementBase {
 
     /**
      * Get the timecode of this track entry (video, audio frames or subtitle block)
+     *
      * @return timecode
      */
     public int getTimecode() {
@@ -106,7 +110,7 @@ public class BlockElement extends ElementBase {
             throw new EBMLParsingException("Parsing block entries with flags above 5 is not implemented yet");
         }
         mDataPosition = raf.getFilePointer();
-        mDataLength = (int)(mInnerLength - (mDataPosition - start));
+        mDataLength = (int) (mInnerLength - (mDataPosition - start));
         raf.skipBytes(mDataLength);
         return true;
     }
@@ -114,8 +118,7 @@ public class BlockElement extends ElementBase {
     @Override
     public StringBuilder output(int level) {
         StringBuilder sb = super.output(level);
-        Log.v(TAG, sb.toString() + "BLK [" + hexId() + "]: Track=" + mTrackNumber + ", TC=" + mTimecode
-                + ", Content='BINARY/TEXT'");
+        log.info(TAG + " {}BLK [{}]: Track={}, TC={}, Content='BINARY/TEXT'", sb.toString(), hexId(), mTrackNumber, mTimecode);
         return null;
     }
 }

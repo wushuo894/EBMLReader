@@ -18,7 +18,7 @@ public class PGSSubtitles extends Subtitles {
     }
 
     @Override
-    protected String getContents() {
+    public String getContents() {
         throw new UnsupportedOperationException();
     }
 }

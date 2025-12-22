@@ -1,9 +1,8 @@
 package com.matthewn4444.ebml.elements;
 
-import android.util.Log;
-
 import com.matthewn4444.ebml.node.ByteNode;
 import com.matthewn4444.ebml.node.NodeBase;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -12,6 +11,7 @@ import java.io.RandomAccessFile;
  * Similar to StringElement but this will not allocate nor copy the data from the file stream.
  * You can access the data later if you need it
  */
+@Slf4j
 public class ByteElement extends ElementBase {
     private long mDataPosition;
 
@@ -65,7 +65,7 @@ public class ByteElement extends ElementBase {
     public StringBuilder output(int level) {
         StringBuilder sb = super.output(level);
         String data = "Binary(@" + Integer.toHexString((int) mDataPosition) + " len=" + mInnerLength + ")";
-        Log.v(TAG, sb.toString() + "BYTE [" + hexId() + "]: '" + data + "'");
+        log.info(TAG+" "+ sb.toString() + "BYTE [" + hexId() + "]: '" + data + "'");
         return null;
     }
 }

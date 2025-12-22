@@ -1,15 +1,14 @@
 package com.matthewn4444.ebml.elements;
 
-
-import android.util.Log;
-
 import com.matthewn4444.ebml.EBMLParsingException;
 import com.matthewn4444.ebml.node.IntNode;
 import com.matthewn4444.ebml.node.NodeBase;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
+@Slf4j
 public class IntElement extends ElementBase {
     private int mData;
 
@@ -53,7 +52,7 @@ public class IntElement extends ElementBase {
     @Override
     public StringBuilder output(int level) {
         StringBuilder sb = super.output(level);
-        Log.v(TAG, sb.toString() + "INT [" + hexId() + "]: " + mData);
+        log.info(TAG+" "+ sb.toString() + "INT [" + hexId() + "]: " + mData);
         return null;
     }
 }
