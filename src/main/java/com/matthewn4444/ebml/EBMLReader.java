@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 @Slf4j
-public class EBMLReader {
+public class EBMLReader implements AutoCloseable {
     private static final String TAG = "EBMLReader";
 
     public static final int ID = 0x1A45DFA3;
@@ -129,6 +129,7 @@ public class EBMLReader {
      *
      * @throws IOException
      */
+    @Override
     public void close() throws IOException {
         if (mIsOpened) {
             mRanAccFile.close();
