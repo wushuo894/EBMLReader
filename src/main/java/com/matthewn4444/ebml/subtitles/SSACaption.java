@@ -44,11 +44,8 @@ public class SSACaption extends Caption {
         // TODO do this properly
         if (mCachedVTT == null) {
             String[] sections = getStringData().split(",", 9);
-            String style = sections[2];
-            if (style.equalsIgnoreCase("Default")) {
-                String dialogue = sections[8];
-                mCachedVTT = dialogue.replaceAll("\\{.*?}", "");
-            }
+            String dialogue = sections[8];
+            mCachedVTT = dialogue.replaceAll("\\{.*?}", "");
         }
         return mCachedVTT;
     }

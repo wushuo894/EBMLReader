@@ -4,25 +4,27 @@ import com.matthewn4444.ebml.Tracks;
 import com.matthewn4444.ebml.elements.BlockElement;
 import com.matthewn4444.ebml.elements.IntElement;
 import com.matthewn4444.ebml.elements.MasterElement;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
-@EqualsAndHashCode(callSuper = true)
 @Slf4j
-@Data
 public abstract class Subtitles extends Tracks {
     public static final String TAG = "Subtitles";
     public static final String SSA_CODEC_ID = "S_TEXT/ASS";
     public static final String SRT_CODEC_ID = "S_TEXT/UTF8";
     public static final String PGS_CODEC_ID = "S_HDMV/PGS";
 
+    @AllArgsConstructor
     public enum Type {
-        SSA, SRT, PGS
+        SSA("ass"), SRT("srt"), PGS("pgs");
+
+        @Getter
+        private final String extName;
     }
 
     protected final boolean mIsCompressed;
@@ -150,7 +152,7 @@ public abstract class Subtitles extends Tracks {
                         .append(caption.getStartTime().format())
                         .append(" --> ")
                         .append(caption.getEndTime().format()).append('\n')
-                        .append(caption.getFormattedVTT().replaceAll("(?i)\\\\n", "\n"))
+                        .append(entry.replaceAll("(?i)\\\\n", "\n"))
                         .append("\n\n");
             }
         }
