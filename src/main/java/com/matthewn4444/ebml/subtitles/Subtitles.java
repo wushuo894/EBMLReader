@@ -130,7 +130,20 @@ public abstract class Subtitles extends Tracks {
         StringBuilder sb = new StringBuilder();
         sb.append("WEBVTT\n\n");
         int n = 1;
-        for (Caption caption : readUnreadSubtitles()) {
+
+        for (Caption caption : mReadCaptions) {
+            String entry = caption.getFormattedVTT();
+            if (entry != null) {
+                sb.append(n++).append('\n')
+                        .append(caption.getStartTime().format())
+                        .append(" --> ")
+                        .append(caption.getEndTime().format()).append('\n')
+                        .append(caption.getFormattedVTT().replaceAll("(?i)\\\\n", "\n"))
+                        .append("\n\n");
+            }
+        }
+
+        for (Caption caption : mUnreadCaptions) {
             String entry = caption.getFormattedVTT();
             if (entry != null) {
                 sb.append(n++).append('\n')
