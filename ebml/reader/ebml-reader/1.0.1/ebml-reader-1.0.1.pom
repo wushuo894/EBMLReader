@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>ebml.reader</groupId>
     <artifactId>ebml-reader</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 
     <url>https://github.com/wushuo894/EBMLReader</url>
 
@@ -20,13 +20,13 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.42</version>
+            <version>1.18.48</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.5.21</version>
+            <version>1.6.5</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -51,7 +51,8 @@
                 <artifactId>maven-deploy-plugin</artifactId>
                 <version>3.1.4</version>
                 <configuration>
-                    <altDeploymentRepository>internal.repo::default::file://${project.build.directory}/mvn-repo
+                    <altDeploymentRepository>
+                        internal.repo::default::file://${project.build.directory}/mvn-repo
                     </altDeploymentRepository>
                 </configuration>
             </plugin>
